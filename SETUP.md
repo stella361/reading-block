@@ -82,6 +82,19 @@ login ID that you paste into the extension.
 
 ---
 
+## Part C: First use
+
+1. Open five articles and **left-click the Reading Block icon once** on each. A
+   small "Saved" confirmation appears in the corner each time.
+2. On the fifth save, Google asks permission to add events to your calendar.
+   Because this is your own personal, unpublished app, it may warn that the app
+   is "unverified." That's expected: click **Advanced**, then **Go to Reading
+   Block (unsafe)**, then **Allow**.
+3. Done. A 30-minute reading block appears on the next free day in your chosen
+   window, with the five links in the event notes.
+
+---
+
 ## If something goes wrong
 - **"Access blocked ... has not completed the Google verification process"
   (Error 403: access_denied):** your Google account isn't on the tester list. Go
