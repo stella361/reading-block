@@ -1,4 +1,4 @@
-# Setting up Reading Block (one time, ~15 minutes)
+# Setting up Reading Block (one time, ~5 minutes)
 
 This guide gets the extension running in Chrome and connected to your Google
 Calendar. You only do this once. Follow it top to bottom.
@@ -79,30 +79,6 @@ login ID that you paste into the extension.
 ### B6. Reload the extension
 1. Back on `chrome://extensions`, click the circular **reload** arrow on the
    Reading Block card.
-
----
-
-## Part C: Test it safely (don't touch your real calendar yet)
-
-Before letting it write to your real schedule, point it at a throwaway calendar.
-
-1. Open **Google Calendar** (calendar.google.com).
-2. Next to "Other calendars," click **+** → **Create new calendar**. Name it
-   `Reading Block Test` and click **Create calendar**.
-3. In that calendar's settings, scroll to **Integrate calendar** and copy the
-   **Calendar ID** (a long address ending in `@group.calendar.google.com`).
-4. **Right-click** the Reading Block toolbar icon → **Settings**. Paste that
-   Calendar ID into the **Calendar ID** box → **Save settings**.
-5. Save 5 articles: open 5 pages and **left-click the Reading Block icon once**
-   on each (a small "Saved" confirmation appears each time). On the 5th, the
-   first time, Google will ask you to allow calendar access. Click through (if it
-   warns the app is "unverified," click **Advanced** → **Go to Reading Block
-   (unsafe)** — this is normal for your own personal, unpublished app).
-6. Check the `Reading Block Test` calendar: a 30-minute **Reading Block** should
-   appear on a free day in your window, with the 5 links in the notes.
-
-When you're happy, change the Calendar ID in Settings back to `primary` to use
-your real calendar.
 
 ---
 
