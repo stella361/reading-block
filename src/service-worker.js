@@ -72,9 +72,12 @@ chrome.action.onClicked.addListener((tab) => {
 async function saveCurrentTab(tab) {
   const url = tab?.url || "";
   // Only normal web pages can be saved (not chrome:// pages, the dashboard, the
-  // new-tab page, etc.). On those there's nothing to do and we can't inject our
-  // confirmation either, so we quietly do nothing.
-  if (!/^https?:/i.test(url)) return;
+  // new-tab page, etc.). The browser also forbids drawing our in-page toast on
+  // those pages, so a system notification is the only way to say "can't save."
+  if (!/^https?:/i.test(url)) {
+    notify("This page can't be saved", "Reading Block only saves normal web pages.");
+    return;
+  }
 
   const result = await saveAndMaybeSchedule(url, tab.title);
   if (tab.id == null) return;
@@ -285,6 +288,21 @@ async function saveAndMaybeSchedule(url, title) {
 }
 
 // --- Small helpers ----------------------------------------------------------
+
+// Pop a small desktop notification. Used only for pages where we can't inject an
+// in-page toast (Chrome's own pages). Never lets a failure break anything.
+function notify(title, message) {
+  try {
+    chrome.notifications.create({
+      type: "basic",
+      iconUrl: chrome.runtime.getURL("icons/icon-128.png"),
+      title,
+      message,
+    });
+  } catch (_) {
+    /* notifications are a nicety, not essential */
+  }
+}
 
 // Friendly date like "Mon, Jun 29 at 2:00 PM" in the machine's local time.
 function formatWhen(date) {
