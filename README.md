@@ -3,6 +3,9 @@
 **Save articles with one click. Every five saves, your browser books you a quiet
 30-minute reading block on your Google Calendar so you actually read them.**
 
+> This is the **Google Calendar** version. If you prefer Feishu/Lark Calendar,
+> check out the [Feishu/Lark version](https://github.com/zarazhangrui/reading-block-lark).
+
 Reading Block is a Chrome extension for people who save a lot of "I'll read this
 later" links and never get back to them. Instead of another list that grows
 forever, it turns your saved reading into real appointments with yourself.
