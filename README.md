@@ -3,6 +3,8 @@
 **Save articles with one click. Every five saves, your browser books you a quiet
 30-minute reading block on your Google Calendar so you actually read them.**
 
+📺 [Watch the demo video (2 minutes)](https://www.youtube.com/watch?v=Q8g1hod552g)
+
 > This is the **Google Calendar** version. If you prefer Feishu/Lark Calendar,
 > check out the [Feishu/Lark version](https://github.com/zarazhangrui/reading-block-lark).
 
