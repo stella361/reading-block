@@ -12,12 +12,13 @@
 import { findNextFreeSlot, localDateKey } from "./slots.js";
 
 const CAL_API = "https://www.googleapis.com/calendar/v3";
+let manualToken = null;
 
 // --- Permission (OAuth token via Chrome's built-in Google login) ------------
 
 // Ask Chrome for a Google access token. `interactive: true` lets Chrome pop the
 // Google consent screen the first time; after that it's silent and cached.
-function getToken(interactive) {
+function getChromeToken(interactive) {
   return new Promise((resolve, reject) => {
     chrome.identity.getAuthToken({ interactive }, (token) => {
       if (chrome.runtime.lastError || !token) {
@@ -29,9 +30,84 @@ function getToken(interactive) {
   });
 }
 
+async function getToken(interactive) {
+  if (manualToken && manualToken.expiresAt > Date.now() + 60_000) return manualToken.value;
+
+  try {
+    return await getChromeToken(interactive);
+  } catch (err) {
+    if (!interactive) throw withGoogleSetupHint(err);
+    try {
+      return await getTokenWithWebFlow();
+    } catch (flowErr) {
+      throw withGoogleSetupHint(flowErr, err);
+    }
+  }
+}
+
+function getTokenWithWebFlow() {
+  const oauth = chrome.runtime.getManifest().oauth2 || {};
+  const redirectUri = chrome.identity.getRedirectURL();
+  const params = new URLSearchParams({
+    client_id: oauth.client_id || "",
+    response_type: "token",
+    redirect_uri: redirectUri,
+    scope: (oauth.scopes || []).join(" "),
+    prompt: "consent",
+    include_granted_scopes: "true",
+  });
+  const url = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
+
+  return new Promise((resolve, reject) => {
+    chrome.identity.launchWebAuthFlow({ url, interactive: true }, (responseUrl) => {
+      if (chrome.runtime.lastError || !responseUrl) {
+        reject(new Error(chrome.runtime.lastError?.message || "Google login did not finish."));
+        return;
+      }
+
+      const parsed = new URL(responseUrl);
+      const values = new URLSearchParams(
+        parsed.hash ? parsed.hash.slice(1) : parsed.search.slice(1)
+      );
+      const error = values.get("error");
+      if (error) {
+        reject(new Error(values.get("error_description") || error));
+        return;
+      }
+
+      const token = values.get("access_token");
+      if (!token) {
+        reject(new Error("Google did not return permission to use Calendar."));
+        return;
+      }
+
+      const expiresIn = Number(values.get("expires_in") || 3600);
+      manualToken = { value: token, expiresAt: Date.now() + expiresIn * 1000 };
+      resolve(token);
+    });
+  });
+}
+
+function withGoogleSetupHint(err, originalErr) {
+  const detail = [err?.message, originalErr?.message].filter(Boolean).join(" / ");
+  const extensionId = chrome.runtime.id;
+  const redirectUri = chrome.identity.getRedirectURL();
+  return new Error(
+    [
+      "Google login is not connected to this Chrome extension.",
+      `Extension ID: ${extensionId}.`,
+      `Google redirect: ${redirectUri}.`,
+      detail ? `Google said: ${detail}` : "",
+    ]
+      .filter(Boolean)
+      .join(" ")
+  );
+}
+
 // If Google rejects a token (e.g. it expired), drop it from Chrome's cache so
 // the next getToken() fetches a fresh one.
 function dropToken(token) {
+  if (manualToken?.value === token) manualToken = null;
   return new Promise((resolve) => {
     chrome.identity.removeCachedAuthToken({ token }, resolve);
   });

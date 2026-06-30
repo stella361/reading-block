@@ -93,9 +93,9 @@ async function saveCurrentTab(tab) {
     // The page was saved, but booking the block failed (e.g. no free slot). Say
     // so right in the toast instead of via a system notification.
     showInPageToast(tab.id, {
-      mode: "saved",
+      mode: "error",
       savedId: result.item.id,
-      note: "Couldn't book a block yet.",
+      note: result.scheduleError,
     });
   } else {
     showInPageToast(tab.id, { mode: "saved", savedId: result.item.id });
@@ -156,10 +156,16 @@ async function showInPageToast(tabId, opts) {
 // `opts` is { mode:'saved'|'booked', savedId, note?, when?, eventId?, batchIds? }.
 function deepreadToast(opts) {
   const HOST_ID = "__readingblock_toast__";
+  function shortenToastText(value) {
+    const text = String(value).replace(/\s+/g, " ").trim();
+    return text.length > 260 ? `${text.slice(0, 257)}...` : text;
+  }
+
   const old = document.getElementById(HOST_ID);
   if (old) old.remove();
 
   const booked = opts.mode === "booked";
+  const failed = opts.mode === "error";
 
   const host = document.createElement("div");
   host.id = HOST_ID;
@@ -171,6 +177,7 @@ function deepreadToast(opts) {
   const box = document.createElement("div");
   box.style.cssText =
     "display:flex;align-items:center;gap:11px;padding:11px 13px 11px 15px;" +
+    "max-width:420px;" +
     "border-radius:12px;background:#f7f1e4;color:#241d13;border:1px solid #d8cbae;" +
     "box-shadow:0 12px 32px -12px rgba(40,30,12,.5);" +
     "font-family:'Avenir Next',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;" +
@@ -179,9 +186,11 @@ function deepreadToast(opts) {
 
   const dot = document.createElement("span");
   dot.style.cssText =
-    "width:8px;height:8px;border-radius:50%;background:#1c6b54;flex:0 0 auto;margin-top:2px;align-self:flex-start;";
+    `width:8px;height:8px;border-radius:50%;background:${failed ? "#a94b33" : "#1c6b54"};` +
+    "flex:0 0 auto;margin-top:2px;align-self:flex-start;";
 
   const text = document.createElement("div");
+  text.style.cssText = "min-width:0;";
   if (booked) {
     const line1 = document.createElement("div");
     line1.textContent = "Reading block booked";
@@ -189,6 +198,15 @@ function deepreadToast(opts) {
     const line2 = document.createElement("div");
     line2.textContent = opts.when || "";
     line2.style.cssText = "color:#6d6049;margin-top:2px;";
+    text.append(line1, line2);
+  } else if (failed) {
+    const line1 = document.createElement("div");
+    line1.textContent = "Saved, but calendar booking failed";
+    line1.style.cssText = "font-weight:700;";
+    const line2 = document.createElement("div");
+    line2.textContent = shortenToastText(opts.note || "Google Calendar setup needs attention.");
+    line2.style.cssText =
+      "color:#6d6049;margin-top:3px;font-size:12px;line-height:1.35;word-break:break-word;";
     text.append(line1, line2);
   } else {
     const line1 = document.createElement("div");
@@ -220,8 +238,8 @@ function deepreadToast(opts) {
     box.style.transform = "translateY(0)";
   });
 
-  // Booked confirmations carry more to read, so they linger a little longer.
-  let timer = setTimeout(close, booked ? 5000 : 3000);
+  // Booked and error confirmations carry more to read, so they linger longer.
+  let timer = setTimeout(close, booked || failed ? 9000 : 3000);
   function close() {
     box.style.opacity = "0";
     box.style.transform = "translateY(-10px)";
