@@ -36,7 +36,7 @@
   "host_permissions": ["https://www.googleapis.com/*"],
 
   "oauth2": {
-    "client_id": "PASTE_YOUR_GOOGLE_CLIENT_ID_HERE.apps.googleusercontent.com",
+    "client_id": "478691400703-6ve0dkenhe0o0fgkq3jsooseaoachl98.apps.googleusercontent.com",
     "scopes": [
       "https://www.googleapis.com/auth/calendar.events",
       "https://www.googleapis.com/auth/calendar.readonly"
